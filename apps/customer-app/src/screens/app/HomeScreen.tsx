@@ -1,8 +1,10 @@
 import {
   View,
- Text,
+  Text,
   StyleSheet,
 } from 'react-native';
+
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import AppButton from '../../components/AppButton';
 
@@ -10,7 +12,12 @@ import { signOut } from '../../services/authService';
 
 import { useAuth } from '../../context/AuthContext';
 
-export default function HomeScreen() {
+type Props =
+  NativeStackScreenProps<any>;
+
+export default function HomeScreen({
+  navigation,
+}: Props) {
   const { profile } = useAuth();
 
   return (
@@ -28,6 +35,21 @@ export default function HomeScreen() {
       </Text>
 
       <AppButton
+        title="Create Order"
+        onPress={() =>
+          navigation.navigate(
+            'CreateOrder'
+          )
+        }
+      />
+
+      <View
+        style={{
+          height: 12,
+        }}
+      />
+
+      <AppButton
         title="Logout"
         onPress={signOut}
       />
@@ -39,7 +61,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
     padding: 24,
   },
 
