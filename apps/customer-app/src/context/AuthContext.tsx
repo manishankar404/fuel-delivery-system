@@ -10,13 +10,21 @@ import { Session } from '@supabase/supabase-js';
 
 import { supabase } from '../lib/supabase';
 
+import { getProfile } from '../services/profileService';
+
+import { Profile } from '../types/profile';
+
 interface AuthContextType {
   session: Session | null;
+
+  profile: Profile | null;
+
   loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
   session: null,
+  profile: null,
   loading: true,
 });
 
@@ -25,24 +33,63 @@ export const AuthProvider = ({
 }: {
   children: ReactNode;
 }) => {
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] =
+    useState<Session | null>(null);
 
-  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] =
+    useState<Profile | null>(null);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const fetchProfile = async (
+    userId: string
+  ) => {
+    try {
+      const profileData =
+        await getProfile(userId);
+
+      setProfile(profileData);
+    } catch (error) {
+      console.log(
+        'Profile Fetch Error:',
+        error
+      );
+    }
+  };
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+    supabase.auth
+      .getSession()
+      .then(async ({ data: { session } }) => {
+        setSession(session);
 
-      setLoading(false);
-    });
+        if (session?.user?.id) {
+          await fetchProfile(
+            session.user.id
+          );
+        }
+
+        setLoading(false);
+      });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
+    } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        setSession(session);
 
-      setLoading(false);
-    });
+        if (session?.user?.id) {
+          await fetchProfile(
+            session.user.id
+          );
+        } else {
+          setProfile(null);
+        }
+
+        setLoading(false);
+      }
+    );
 
     return () => {
       subscription.unsubscribe();
@@ -53,6 +100,7 @@ export const AuthProvider = ({
     <AuthContext.Provider
       value={{
         session,
+        profile,
         loading,
       }}
     >
@@ -61,4 +109,5 @@ export const AuthProvider = ({
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () =>
+  useContext(AuthContext);
