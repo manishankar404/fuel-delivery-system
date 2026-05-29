@@ -19,3 +19,20 @@ export interface CreateOrderPayload {
 
   payment_method: string;
 }
+export interface Order {
+  id: string;
+
+  quantity_liters: number;
+
+  total_price: number;
+
+  delivery_address: string;
+
+  status: string;
+
+  created_at: string;
+
+  fuel_types: {
+    name: string;
+  };
+}

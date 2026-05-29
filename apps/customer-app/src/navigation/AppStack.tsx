@@ -4,6 +4,8 @@ import HomeScreen from '../screens/app/HomeScreen';
 
 import CreateOrderScreen from '../screens/app/CreateOrderScreen';
 
+import OrderHistoryScreen from '../screens/app/OrderHistoryScreen';
+
 const Stack =
   createNativeStackNavigator();
 
@@ -19,6 +21,13 @@ export default function AppStack() {
         name="CreateOrder"
         component={
           CreateOrderScreen
+        }
+      />
+
+      <Stack.Screen
+        name="OrderHistory"
+        component={
+          OrderHistoryScreen
         }
       />
     </Stack.Navigator>

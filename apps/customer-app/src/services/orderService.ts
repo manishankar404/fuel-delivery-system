@@ -60,3 +60,43 @@ export const createOrder =
 
     return data;
   };
+  export const getCustomerOrders =
+  async (
+    customerId: string
+  ) => {
+    const { data, error } =
+      await supabase
+        .from('orders')
+        .select(`
+          *,
+          fuel_types (
+            name
+          )
+        `)
+        .eq(
+          'customer_id',
+          customerId
+        )
+        .order(
+          'created_at',
+          {
+            ascending: false,
+          }
+        );
+
+    console.log(
+      'Customer Orders:',
+      data
+    );
+
+    console.log(
+      'Customer Orders Error:',
+      error
+    );
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  };

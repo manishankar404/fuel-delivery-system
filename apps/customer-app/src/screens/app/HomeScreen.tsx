@@ -42,6 +42,20 @@ export default function HomeScreen({
           )
         }
       />
+      <View
+        style={{
+          height: 12,
+        }}
+      />
+
+      <AppButton
+        title="My Orders"
+        onPress={() =>
+          navigation.navigate(
+            'OrderHistory'
+          )
+        }
+      />
 
       <View
         style={{
