@@ -1,0 +1,252 @@
+.admDashPage {
+  padding: 28px;
+  max-width: 1200px;
+  margin: 0 auto;
+  color: #111827;
+}
+
+.admDashHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.admDashTitle {
+  margin: 0;
+  font-size: 24px;
+  line-height: 32px;
+  letter-spacing: -0.02em;
+}
+
+.admDashSubtitle {
+  margin: 6px 0 0 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.admDashHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admBtn {
+  appearance: none;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.admBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.admBtnPrimary {
+  border-color: #1d4ed8;
+  background: #1d4ed8;
+  color: white;
+}
+
+.admMetrics {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.admMetricCard {
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 12px 12px 10px 12px;
+  box-shadow: 0 1px 0 rgba(17, 24, 39, 0.02);
+}
+
+.admMetricLabel {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.admMetricValue {
+  margin-top: 6px;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.admMetricHint {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.admSection {
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.admSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.admSectionTitle {
+  margin: 0;
+  font-size: 14px;
+  color: #111827;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.admSectionMeta {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.admOrdersGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admOrderCard {
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 14px;
+  background: #ffffff;
+}
+
+.admOrderTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admOrderTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.admOrderMetaRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.admOrderMetaItem {
+  min-width: 0;
+}
+
+.admMetaLabel {
+  display: block;
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 700;
+}
+
+.admMetaValue {
+  display: block;
+  font-size: 13px;
+  color: #111827;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admOrderBottom {
+  margin-top: 12px;
+}
+
+.admOrderActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.admAssignGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admSelect {
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 10px 10px;
+  font-size: 14px;
+  background: #ffffff;
+  min-width: 210px;
+}
+
+.admOrderHint {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.admEmptyState {
+  padding: 18px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.admErrorState {
+  padding: 12px;
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+  border-radius: 12px;
+  font-size: 13px;
+}
+
+@media (max-width: 960px) {
+  .admMetrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .admOrdersGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .admDashPage {
+    padding: 18px;
+  }
+  .admMetrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .admOrderMetaRow {
+    grid-template-columns: 1fr;
+  }
+  .admOrderActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .admAssignGroup {
+    width: 100%;
+  }
+  .admSelect {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+  }
+}
