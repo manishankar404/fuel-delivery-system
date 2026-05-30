@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import { useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
@@ -18,13 +18,16 @@ const DEFAULT_CENTER = {
 };
 
 export default function LiveTrackingScreen() {
-  const route =
-    useRoute<RouteProp<AppStackParamList, 'LiveTracking'>>();
-
+  const route = useRoute<RouteProp<AppStackParamList, 'LiveTracking'>>();
   const { orderId } = route.params;
 
-  const { agentLocation, customerLocation, mapCenter } =
-    useLiveTracking(orderId);
+  const {
+    assignedAgentId,
+    agentLocation,
+    customerLocation,
+    mapCenter,
+    isLoading,
+  } = useLiveTracking(orderId);
 
   const distanceKm = useMemo(() => {
     if (!agentLocation || !customerLocation) {
@@ -51,13 +54,33 @@ export default function LiveTrackingScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Live Delivery Tracking</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>Live Delivery Tracking</Text>
 
-      <Text style={styles.info}>
-        Distance: {distanceKm === null ? '—' : `${distanceKm.toFixed(2)} km`}
-      </Text>
+        <View style={styles.summaryRow}>
+          <Text style={styles.summaryText}>
+            Distance: {distanceKm === null ? '—' : `${distanceKm.toFixed(2)} km`}
+          </Text>
+          <Text style={styles.summaryText}>
+            ETA: {etaMins === null ? '—' : `${etaMins} mins`}
+          </Text>
+        </View>
 
-      <Text style={styles.info}>ETA: {etaMins === null ? '—' : `${etaMins} mins`}</Text>
+        {isLoading ? (
+          <View style={styles.statusRow}>
+            <ActivityIndicator size="small" />
+            <Text style={styles.statusTextInline}>Loading tracking…</Text>
+          </View>
+        ) : assignedAgentId ? (
+          <Text style={styles.statusText}>
+            {agentLocation ? 'Agent is on the move.' : 'Waiting for agent location…'}
+          </Text>
+        ) : (
+          <Text style={styles.statusText}>
+            Waiting for dispatch to assign a delivery agent.
+          </Text>
+        )}
+      </View>
 
       <MapView
         style={styles.map}
@@ -68,8 +91,19 @@ export default function LiveTrackingScreen() {
           longitudeDelta: 0.01,
         }}
       >
+        {customerLocation && (
+          <Marker
+            coordinate={customerLocation}
+            title="Delivery Location"
+            pinColor="#111827"
+          />
+        )}
         {agentLocation && (
-          <Marker coordinate={agentLocation} title="Delivery Agent" />
+          <Marker
+            coordinate={agentLocation}
+            title="Delivery Agent"
+            pinColor="#F97316"
+          />
         )}
       </MapView>
     </View>
@@ -79,21 +113,55 @@ export default function LiveTrackingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#F9FAFB',
   },
 
-  info: {
-    fontSize: 16,
-    paddingHorizontal: 16,
-    paddingBottom: 8,
+  header: {
+    padding: 16,
+    paddingBottom: 10,
   },
 
   title: {
     fontSize: 22,
     fontWeight: 'bold',
-    padding: 16,
+    color: '#111827',
+  },
+
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginTop: 10,
+  },
+
+  summaryText: {
+    fontSize: 14,
+    color: '#111827',
+    fontWeight: '700',
+  },
+
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginTop: 10,
+  },
+
+  statusTextInline: {
+    fontSize: 13,
+    color: '#6B7280',
+    fontWeight: '600',
+  },
+
+  statusText: {
+    marginTop: 10,
+    fontSize: 13,
+    color: '#6B7280',
+    fontWeight: '600',
   },
 
   map: {
     flex: 1,
   },
 });
+

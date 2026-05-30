@@ -1,4 +1,5 @@
 import OrderStatusBadge from '../OrderStatusBadge';
+import OrderLifecycleProgress from '../OrderLifecycleProgress';
 
 import { getOrderStatusBadgeMeta } from '../../shared/orderStatus';
 
@@ -60,6 +61,7 @@ export default function OrderCard({
               <span className="admMetaValue">{assignedAgentName ?? '—'}</span>
             </div>
           </div>
+          <OrderLifecycleProgress status={order.status} />
         </div>
       </div>
 

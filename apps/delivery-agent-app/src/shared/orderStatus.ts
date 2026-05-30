@@ -15,6 +15,45 @@ export type OrderStatusBadgeMeta = {
   borderColor?: string;
 };
 
+export const ORDER_LIFECYCLE_STAGES = [
+  'pending',
+  'approved',
+  'assigned',
+  'out_for_delivery',
+  'delivered',
+] as const;
+
+export type OrderLifecycleStage = (typeof ORDER_LIFECYCLE_STAGES)[number];
+
+export type OrderLifecycleStep = {
+  key: OrderLifecycleStage;
+  label: string;
+};
+
+const ORDER_LIFECYCLE_LABELS: Record<OrderLifecycleStage, string> = {
+  pending: 'Pending',
+  approved: 'Approved',
+  assigned: 'Assigned',
+  out_for_delivery: 'Out',
+  delivered: 'Done',
+};
+
+export function getOrderLifecycleSteps(): OrderLifecycleStep[] {
+  return ORDER_LIFECYCLE_STAGES.map((key) => ({
+    key,
+    label: ORDER_LIFECYCLE_LABELS[key],
+  }));
+}
+
+export function getOrderLifecycleIndex(status: unknown): number {
+  if (!isOrderStatus(status)) {
+    return 0;
+  }
+
+  const index = ORDER_LIFECYCLE_STAGES.indexOf(status);
+  return index === -1 ? 0 : index;
+}
+
 const META_BY_STATUS: Record<OrderStatus, OrderStatusBadgeMeta> = {
   pending: {
     label: 'Pending',
@@ -65,4 +104,3 @@ export function getOrderStatusBadgeMeta(
     textColor: '#374151',
   };
 }
-

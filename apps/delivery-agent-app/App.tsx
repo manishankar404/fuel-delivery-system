@@ -17,7 +17,52 @@ import { supabase } from './src/lib/supabase';
 
 import LoginScreen from './src/screens/LoginScreen';
 
-import DashboardScreen from './src/screens/DashboardScreen';
+import Navigation from './src/navigation';
+import { DeliveryAgentProvider } from './src/context/DeliveryAgentContext';
+import { useDeliveryAgentIdentity } from './src/hooks/useDeliveryAgentIdentity';
+import { useAgentLocationUpdates } from './src/hooks/useAgentLocationUpdates';
+
+function AuthenticatedApp() {
+  const { deliveryAgentId, isLoading, errorMessage } =
+    useDeliveryAgentIdentity();
+
+  useAgentLocationUpdates(deliveryAgentId);
+
+  if (isLoading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Text>Loading…</Text>
+      </View>
+    );
+  }
+
+  if (!deliveryAgentId) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: 24,
+        }}
+      >
+        <Text>{errorMessage ?? 'Unable to load agent profile'}</Text>
+      </View>
+    );
+  }
+
+  return (
+    <DeliveryAgentProvider deliveryAgentId={deliveryAgentId}>
+      <Navigation />
+    </DeliveryAgentProvider>
+  );
+}
 
 export default function App() {
   const [session, setSession] =
@@ -69,7 +114,7 @@ export default function App() {
   }
 
   return session ? (
-    <DashboardScreen />
+    <AuthenticatedApp />
   ) : (
     <LoginScreen />
   );

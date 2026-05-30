@@ -1,5 +1,7 @@
 import { supabase } from '../lib/supabase';
 
+import type { DeliveryOrder } from '../types/order';
+
 export const getAssignedOrders =
   async (
     deliveryAgentId: string
@@ -31,7 +33,7 @@ export const getAssignedOrders =
       throw error;
     }
 
-    return data;
+    return (data ?? []) as DeliveryOrder[];
   };
 
 export const updateOrderStatus =

@@ -6,6 +6,8 @@ import {
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
+import type { AppStackParamList } from '../../navigation/types';
+
 import AppButton from '../../components/AppButton';
 
 import { signOut } from '../../services/authService';
@@ -13,7 +15,7 @@ import { signOut } from '../../services/authService';
 import { useAuth } from '../../context/AuthContext';
 
 type Props =
-  NativeStackScreenProps<any>;
+  NativeStackScreenProps<AppStackParamList, 'Home'>;
 
 export default function HomeScreen({
   navigation,
@@ -52,7 +54,8 @@ export default function HomeScreen({
         title="My Orders"
         onPress={() =>
           navigation.navigate(
-            'OrderHistory'
+            'OrderHistory',
+            { initialTab: 'active' }
           )
         }
       />
@@ -62,6 +65,18 @@ export default function HomeScreen({
           height: 12,
         }}
       />
+
+      <AppButton
+        title="Delivered Orders"
+        onPress={() =>
+          navigation.navigate(
+            'OrderHistory',
+            { initialTab: 'delivered' }
+          )
+        }
+      />
+
+      <View style={{ height: 12 }} />
 
       <AppButton
         title="Logout"
