@@ -23,8 +23,13 @@ export default function LoginPage() {
           email,
           password
         );
-      } catch (error: any) {
-        alert(error.message);
+      } catch (error: unknown) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'Login failed';
+
+        alert(message);
       } finally {
         setLoading(false);
       }

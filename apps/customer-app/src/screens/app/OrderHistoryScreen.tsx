@@ -33,6 +33,8 @@ import {
 import OrderTimeline
 from '../../components/OrderTimeline';
 
+import OrderStatusBadge from '../../components/OrderStatusBadge';
+
 export default function OrderHistoryScreen() {
 
   interface HistoryItem {
@@ -186,11 +188,10 @@ const [historyMap,
         ₹{item.total_price}
       </Text>
 
-      <Text>
-        Status:
-        {' '}
-        {item.status}
-      </Text>
+      <View style={styles.statusRow}>
+        <Text>Status: </Text>
+        <OrderStatusBadge status={item.status} />
+      </View>
 
       {(
   item.status ===
@@ -287,5 +288,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 8,
+  },
+
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 4,
+    marginBottom: 4,
+    flexWrap: 'wrap',
   },
 });

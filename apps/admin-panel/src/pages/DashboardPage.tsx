@@ -25,6 +25,8 @@ import {
   assignDeliveryAgent,
 } from '../services/deliveryAgentService';
 
+import OrderStatusBadge from '../components/OrderStatusBadge';
+
 interface Order {
   id: string;
 
@@ -209,9 +211,7 @@ const [deliveryAgents,
           </p>
 
           <p>
-            Status:
-            {' '}
-            {order.status}
+            Status: <OrderStatusBadge status={order.status} />
           </p>
 
           <button

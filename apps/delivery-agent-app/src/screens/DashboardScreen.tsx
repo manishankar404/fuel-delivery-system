@@ -28,6 +28,8 @@ import {
   updateAgentLocation,
 } from '../services/locationService';
 
+import OrderStatusBadge from '../components/OrderStatusBadge';
+
 export default function DashboardScreen() {
   const [orders, setOrders] =
     useState<any[]>([]);
@@ -214,11 +216,19 @@ export default function DashboardScreen() {
         }L
       </Text>
 
-      <Text>
-        Status:
-        {' '}
-        {item.status}
-      </Text>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 8,
+          flexWrap: 'wrap',
+          marginTop: 4,
+          marginBottom: 4,
+        }}
+      >
+        <Text>Status: </Text>
+        <OrderStatusBadge status={item.status} />
+      </View>
 
       <Text>
         Address:
