@@ -1,306 +1,99 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-} from 'react-native';
+import { useMemo } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
-import {
-  useEffect,
-  useState,
-  useCallback,
-} from 'react';
+import { useRoute } from '@react-navigation/native';
+import type { RouteProp } from '@react-navigation/native';
+import MapView, { Marker } from 'react-native-maps';
 
-import MapView, {
-  Marker,
-} from 'react-native-maps';
-
-import { supabase }
-from '../../lib/supabase';
-
-import {
-  useRoute,
-} from '@react-navigation/native';
-
-interface RouteParams {
-  orderId: string;
-}
-
+import type { AppStackParamList } from '../../navigation/types';
 import {
   calculateDistance,
   estimateDeliveryTime,
 } from '../../services/distanceService';
+import { useLiveTracking } from '../../hooks/useLiveTracking';
+
+const DEFAULT_CENTER = {
+  latitude: 11.6643,
+  longitude: 78.146,
+};
 
 export default function LiveTrackingScreen() {
-
   const route =
-    useRoute<any>();
+    useRoute<RouteProp<AppStackParamList, 'LiveTracking'>>();
 
-  const { orderId } =
-    route.params as RouteParams;
+  const { orderId } = route.params;
 
-  const [
-    assignedAgentId,
-    setAssignedAgentId,
-  ] = useState<
-    string | null
-  >(null);
+  const { agentLocation, customerLocation, mapCenter } =
+    useLiveTracking(orderId);
 
-  const [agentLocation,
-    setAgentLocation] =
-    useState({
-      latitude: 11.6643,
-      longitude: 78.1460,
-    });
-
-  const [
-    customerLocation,
-    setCustomerLocation,
-  ] = useState({
-    latitude: 0,
-    longitude: 0,
-  });
-
-  const loadAssignedAgent =
-    useCallback(async () => {
-      try {
-        const {
-          data,
-          error,
-        } =
-          await supabase
-            .from('orders')
-            .select(`
-              assigned_delivery_agent_id,
-              latitude,
-              longitude
-            `)
-            .eq(
-              'id',
-              orderId
-            )
-            .single();
-
-        if (error) {
-          console.log(error);
-          return;
-        }
-
-        if (
-          data
-            ?.assigned_delivery_agent_id
-        ) {
-          setAssignedAgentId(
-            data.assigned_delivery_agent_id
-          );
-          if (
-            data.latitude &&
-            data.longitude
-          ) {
-            setCustomerLocation({
-              latitude:
-                data.latitude,
-
-              longitude:
-                data.longitude,
-            });
-          }
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    }, [orderId]);
-
-  const subscribeToTracking =
-    useCallback(() => {
-
-      if (!assignedAgentId) {
-        return;
-      }
-
-      const loadLocation =
-        async () => {
-          try {
-            const {
-              data,
-              error,
-            } =
-              await supabase
-                .from(
-                  'delivery_agents'
-                )
-                .select(
-                  `
-                  current_latitude,
-                  current_longitude
-                  `
-                )
-                .eq(
-                  'id',
-                  assignedAgentId
-                )
-                .single();
-
-            if (error) {
-              console.log(error);
-              return;
-            }
-
-            if (
-              data
-                ?.current_latitude &&
-              data
-                ?.current_longitude
-            ) {
-              setAgentLocation({
-                latitude:
-                  data.current_latitude,
-
-                longitude:
-                  data.current_longitude,
-              });
-            }
-          } catch (error) {
-            console.log(error);
-          }
-        };
-
-      loadLocation();
-
-      const channel =
-        supabase.channel(
-          `live-tracking-${assignedAgentId}`
-        );
-
-      channel
-        .on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table:
-              'delivery_agents',
-            filter:
-              `id=eq.${assignedAgentId}`,
-          },
-          () => {
-            loadLocation();
-          }
-        )
-        .subscribe();
-
-      return () => {
-        supabase.removeChannel(
-          channel
-        );
-      };
-    }, [assignedAgentId]);
-
-  useEffect(() => {
-    loadAssignedAgent();
-  }, [loadAssignedAgent]);
-
-  useEffect(() => {
-
-    if (!assignedAgentId) {
-      return;
+  const distanceKm = useMemo(() => {
+    if (!agentLocation || !customerLocation) {
+      return null;
     }
 
-    const cleanup =
-      subscribeToTracking();
-
-    return () => {
-      if (cleanup) {
-        cleanup();
-      }
-    };
-
-  }, [
-    assignedAgentId,
-    subscribeToTracking,
-  ]);
-
-  const distance =
-    calculateDistance(
+    return calculateDistance(
       customerLocation.latitude,
       customerLocation.longitude,
-
       agentLocation.latitude,
       agentLocation.longitude
     );
+  }, [agentLocation, customerLocation]);
 
-    const eta =
-      estimateDeliveryTime(
-        distance
-      );    
+  const etaMins = useMemo(() => {
+    if (distanceKm === null) {
+      return null;
+    }
+
+    return estimateDeliveryTime(distanceKm);
+  }, [distanceKm]);
+
+  const center = mapCenter ?? DEFAULT_CENTER;
 
   return (
     <View style={styles.container}>
-
-      <Text style={styles.title}>
-        Live Delivery Tracking
-      </Text>
+      <Text style={styles.title}>Live Delivery Tracking</Text>
 
       <Text style={styles.info}>
-        Distance:
-        {' '}
-        {distance.toFixed(2)}
-        km
+        Distance: {distanceKm === null ? '—' : `${distanceKm.toFixed(2)} km`}
       </Text>
 
-      <Text style={styles.info}>
-        ETA:
-        {' '}
-        {eta}
-        mins
-      </Text>
+      <Text style={styles.info}>ETA: {etaMins === null ? '—' : `${etaMins} mins`}</Text>
 
       <MapView
         style={styles.map}
         region={{
-          latitude:
-            agentLocation.latitude,
-
-          longitude:
-            agentLocation.longitude,
-
-          latitudeDelta:
-            0.01,
-
-          longitudeDelta:
-            0.01,
+          latitude: center.latitude,
+          longitude: center.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
         }}
       >
-        <Marker
-          coordinate={
-            agentLocation
-          }
-          title="Delivery Agent"
-        />
+        {agentLocation && (
+          <Marker coordinate={agentLocation} title="Delivery Agent" />
+        )}
       </MapView>
-
     </View>
   );
 }
 
-const styles =
-  StyleSheet.create({
-    container: {
-      flex: 1,
-    },
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
 
-    info: {
-      fontSize: 16,
-      paddingHorizontal: 16,
-      paddingBottom: 8,
-    },
+  info: {
+    fontSize: 16,
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+  },
 
-    title: {
-      fontSize: 22,
-      fontWeight: 'bold',
-      padding: 16,
-    },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    padding: 16,
+  },
 
-    map: {
-      flex: 1,
-    },
-  });
+  map: {
+    flex: 1,
+  },
+});

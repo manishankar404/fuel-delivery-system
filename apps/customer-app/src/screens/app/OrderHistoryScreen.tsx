@@ -21,8 +21,10 @@ import { Order } from '../../types/order';
 
 import { supabase } from '../../lib/supabase';
 
-import { useNavigation }
-from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+import type { AppStackParamList } from '../../navigation/types';
 
 import {
   getOrderHistory,
@@ -51,7 +53,9 @@ const [historyMap,
   >({});
   
   const navigation =
-  useNavigation<any>();
+    useNavigation<
+      NativeStackNavigationProp<AppStackParamList>
+    >();
 
   const { profile } = useAuth();
 

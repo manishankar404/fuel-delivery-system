@@ -8,8 +8,10 @@ import OrderHistoryScreen from '../screens/app/OrderHistoryScreen';
 
 import LiveTrackingScreen from '../screens/app/LiveTrackingScreen';
 
+import type { AppStackParamList } from './types';
+
 const Stack =
-  createNativeStackNavigator();
+  createNativeStackNavigator<AppStackParamList>();
 
 export default function AppStack() {
   return (

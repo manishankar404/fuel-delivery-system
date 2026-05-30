@@ -55,9 +55,7 @@ export const AuthProvider = ({
 
       setProfile(profileData);
 
-      await registerForPushNotifications(
-        profileData.id
-      );
+      await registerForPushNotifications();
     } catch (error) {
       console.log(
         'Profile Fetch Error:',
