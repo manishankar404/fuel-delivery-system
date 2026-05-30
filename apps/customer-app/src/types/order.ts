@@ -18,6 +18,10 @@ export interface CreateOrderPayload {
   delivery_address: string;
 
   payment_method: string;
+
+  latitude: number;
+
+  longitude: number;
 }
 export interface Order {
   id: string;
@@ -35,4 +39,8 @@ export interface Order {
   fuel_types: {
     name: string;
   };
+
+  latitude: number;
+
+  longitude: number;
 }

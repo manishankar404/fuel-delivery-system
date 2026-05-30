@@ -6,6 +6,8 @@ import CreateOrderScreen from '../screens/app/CreateOrderScreen';
 
 import OrderHistoryScreen from '../screens/app/OrderHistoryScreen';
 
+import LiveTrackingScreen from '../screens/app/LiveTrackingScreen';
+
 const Stack =
   createNativeStackNavigator();
 
@@ -28,6 +30,13 @@ export default function AppStack() {
         name="OrderHistory"
         component={
           OrderHistoryScreen
+        }
+      />
+
+      <Stack.Screen
+        name="LiveTracking"
+        component={
+          LiveTrackingScreen
         }
       />
     </Stack.Navigator>

@@ -8,6 +8,7 @@ import {
 import {
   useEffect,
   useState,
+  useCallback,
 } from 'react';
 
 import { useAuth } from '../../context/AuthContext';
@@ -18,31 +19,146 @@ import {
 
 import { Order } from '../../types/order';
 
+import { supabase } from '../../lib/supabase';
+
+import { useNavigation }
+from '@react-navigation/native';
+
+import {
+  getOrderHistory,
+} from '../../services/historyService';
+
+import OrderTimeline
+from '../../components/OrderTimeline';
+
 export default function OrderHistoryScreen() {
+
+  interface HistoryItem {
+  id: string;
+
+  status: string;
+
+  created_at: string;
+}
+
+const [historyMap,
+  setHistoryMap] =
+  useState<
+    Record<
+      string,
+      HistoryItem[]
+    >
+  >({});
+  
+  const navigation =
+  useNavigation<any>();
+
   const { profile } = useAuth();
 
   const [orders, setOrders] =
     useState<Order[]>([]);
 
-  useEffect(() => {
-    if (profile?.id) {
-      loadOrders();
-    }
-  }, [profile]);
-
   const loadOrders =
-    async () => {
+    useCallback(async () => {
+      if (!profile?.id) {
+        return;
+      }
+
       try {
         const data =
           await getCustomerOrders(
-            profile!.id
+            profile.id
           );
 
-        setOrders(data);
+        const ordersData =
+          data || [];
+
+        setOrders(
+          ordersData
+        );
+
+        loadHistories(
+          ordersData
+        );
       } catch (error) {
         console.log(error);
       }
+    }, [profile?.id]);
+
+    const loadHistories =
+  async (
+    ordersData: Order[]
+  ) => {
+    try {
+      const historyData:
+        Record<
+          string,
+          HistoryItem[]
+        > = {};
+
+      for (const order of ordersData) {
+        const history =
+          await getOrderHistory(
+            order.id
+          );
+
+        historyData[
+          order.id
+        ] = history;
+      }
+
+      setHistoryMap(
+        historyData
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const subscribeToRealtime =
+    useCallback(() => {
+      const channel =
+        supabase
+          .channel(
+            'customer-orders'
+          )
+          .on(
+            'postgres_changes',
+            {
+              event: '*',
+              schema: 'public',
+              table: 'orders',
+            },
+            () => {
+              loadOrders();
+            }
+          );
+
+      channel.subscribe();
+
+      return channel;
+    }, [loadOrders]);
+
+  useEffect(() => {
+    if (!profile?.id) {
+      return;
+    }
+
+    loadOrders();
+
+    const channel =
+      subscribeToRealtime();
+
+    return () => {
+      supabase.removeChannel(
+        channel
+      );
     };
+  }, [
+    profile?.id,
+    loadOrders,
+    subscribeToRealtime,
+  ]);
 
   const renderItem = ({
     item,
@@ -72,10 +188,51 @@ export default function OrderHistoryScreen() {
         {item.status}
       </Text>
 
+      {(
+  item.status ===
+    'out_for_delivery' ||
+
+  item.status ===
+    'delivered'
+) && (
+  <Text
+    style={{
+      color: 'blue',
+      marginTop: 8,
+    }}
+    onPress={() =>
+      navigation.navigate(
+        'LiveTracking',
+        {
+          orderId: item.id,
+        }
+      )
+    }
+  >
+    Track Delivery
+  </Text>
+)}
+
+      <OrderTimeline
+          history={
+            historyMap[
+              item.id
+            ] || []
+          }
+        />
+
       <Text>
         Address:
         {' '}
         {item.delivery_address}
+      </Text>
+
+      <Text>
+        Location:
+        {' '}
+        {item.latitude},
+        {' '}
+        {item.longitude}
       </Text>
     </View>
   );

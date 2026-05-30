@@ -141,3 +141,14 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+
+```gitignore
+node_modules
+.expo
+dist
+build
+.env
+.env.*
+npm-debug.log
+```

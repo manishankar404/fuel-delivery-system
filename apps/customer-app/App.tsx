@@ -4,10 +4,14 @@ import { AuthProvider } from './src/context/AuthContext';
 
 import Navigation from './src/navigation';
 
+import { LocationProvider } from './src/context/LocationContext';
+
 export default function App() {
   return (
-    <AuthProvider>
-      <Navigation />
-    </AuthProvider>
+    <LocationProvider>
+      <AuthProvider>
+        <Navigation />
+      </AuthProvider>
+    </LocationProvider>
   );
 }

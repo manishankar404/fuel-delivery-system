@@ -14,6 +14,10 @@ import { getProfile } from '../services/profileService';
 
 import { Profile } from '../types/profile';
 
+import {
+  registerForPushNotifications,
+} from '../services/notificationService';
+
 interface AuthContextType {
   session: Session | null;
 
@@ -50,6 +54,10 @@ export const AuthProvider = ({
         await getProfile(userId);
 
       setProfile(profileData);
+
+      await registerForPushNotifications(
+        profileData.id
+      );
     } catch (error) {
       console.log(
         'Profile Fetch Error:',
