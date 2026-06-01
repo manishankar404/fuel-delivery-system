@@ -11,7 +11,7 @@ function numberOr(value: string, fallback: number) {
 export default function SettingsPage() {
   const [settings, setSettings] = useState<PlatformSettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
+  const [savingKey, setSavingKey] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -76,15 +76,28 @@ export default function SettingsPage() {
     return null;
   }, [form]);
 
-  const onSave = async () => {
-    if (validation) return;
-
+  const savePatch = async (key: string, patch: Partial<PlatformSettings>, okMessage: string) => {
     try {
-      setIsSaving(true);
+      setSavingKey(key);
       setErrorMessage(null);
       setSuccessMessage(null);
 
-      const updated = await updatePlatformSettings({
+      const updated = await updatePlatformSettings(patch);
+      setSettings(updated);
+      setSuccessMessage(okMessage);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to save settings');
+    } finally {
+      setSavingKey(null);
+    }
+  };
+
+  const onSaveAll = async () => {
+    if (validation) return;
+
+    await savePatch(
+      'all',
+      {
         delivery_charge: numberOr(form.delivery_charge, 0),
         min_liters: numberOr(form.min_liters, 1),
         max_liters: numberOr(form.max_liters, 500),
@@ -92,15 +105,9 @@ export default function SettingsPage() {
         discount_type: form.discount_type,
         discount_value: numberOr(form.discount_value, 0),
         credit_per_liter: numberOr(form.credit_per_liter, 0),
-      });
-
-      setSettings(updated);
-      setSuccessMessage('Saved.');
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Failed to save settings');
-    } finally {
-      setIsSaving(false);
-    }
+      },
+      'Saved.'
+    );
   };
 
   if (isLoading) {
@@ -137,28 +144,117 @@ export default function SettingsPage() {
           <h3 style={{ marginTop: 0 }}>Delivery Pricing</h3>
 
           <label style={{ display: 'block', fontWeight: 800, fontSize: 12, color: '#6B7280' }}>Delivery charge (₹)</label>
-          <input
-            value={form.delivery_charge}
-            onChange={(e) => setForm((p) => ({ ...p, delivery_charge: e.target.value }))}
-            style={{ width: '100%', padding: 10, borderRadius: 10, border: '1px solid #d1d5db', marginTop: 6 }}
-          />
+          <div style={{ display: 'flex', gap: 10, marginTop: 6 }}>
+            <input
+              value={form.delivery_charge}
+              onChange={(e) => setForm((p) => ({ ...p, delivery_charge: e.target.value }))}
+              style={{ flex: 1, padding: 10, borderRadius: 10, border: '1px solid #d1d5db' }}
+            />
+            <button
+              type="button"
+              onClick={() =>
+                void savePatch(
+                  'delivery_charge',
+                  { delivery_charge: numberOr(form.delivery_charge, 0) },
+                  'Updated delivery charge.'
+                )
+              }
+              disabled={savingKey !== null}
+              style={{
+                padding: '10px 14px',
+                borderRadius: 12,
+                border: '1px solid #111827',
+                background: '#111827',
+                color: '#fff',
+                cursor: 'pointer',
+                fontWeight: 800,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {savingKey === 'delivery_charge' ? 'Saving...' : 'Update'}
+            </button>
+          </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10, marginTop: 12 }}>
             <div>
               <label style={{ display: 'block', fontWeight: 800, fontSize: 12, color: '#6B7280' }}>Min liters</label>
-              <input
-                value={form.min_liters}
-                onChange={(e) => setForm((p) => ({ ...p, min_liters: e.target.value }))}
-                style={{ width: '100%', padding: 10, borderRadius: 10, border: '1px solid #d1d5db', marginTop: 6 }}
-              />
+              <div style={{ display: 'flex', gap: 10, marginTop: 6 }}>
+                <input
+                  value={form.min_liters}
+                  onChange={(e) => setForm((p) => ({ ...p, min_liters: e.target.value }))}
+                  style={{ flex: 1, padding: 10, borderRadius: 10, border: '1px solid #d1d5db' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const minLiters = numberOr(form.min_liters, 0);
+                    const maxLiters = numberOr(form.max_liters, 0);
+                    if (minLiters <= 0) {
+                      setErrorMessage('Minimum liters must be > 0.');
+                      return;
+                    }
+                    if (maxLiters > 0 && maxLiters < minLiters) {
+                      setErrorMessage('Maximum liters must be >= minimum liters.');
+                      return;
+                    }
+
+                    void savePatch('min_liters', { min_liters: minLiters }, 'Updated min liters.');
+                  }}
+                  disabled={savingKey !== null}
+                  style={{
+                    padding: '10px 14px',
+                    borderRadius: 12,
+                    border: '1px solid #111827',
+                    background: '#111827',
+                    color: '#fff',
+                    cursor: 'pointer',
+                    fontWeight: 800,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {savingKey === 'min_liters' ? 'Saving...' : 'Update'}
+                </button>
+              </div>
             </div>
             <div>
               <label style={{ display: 'block', fontWeight: 800, fontSize: 12, color: '#6B7280' }}>Max liters</label>
-              <input
-                value={form.max_liters}
-                onChange={(e) => setForm((p) => ({ ...p, max_liters: e.target.value }))}
-                style={{ width: '100%', padding: 10, borderRadius: 10, border: '1px solid #d1d5db', marginTop: 6 }}
-              />
+              <div style={{ display: 'flex', gap: 10, marginTop: 6 }}>
+                <input
+                  value={form.max_liters}
+                  onChange={(e) => setForm((p) => ({ ...p, max_liters: e.target.value }))}
+                  style={{ flex: 1, padding: 10, borderRadius: 10, border: '1px solid #d1d5db' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const minLiters = numberOr(form.min_liters, 0);
+                    const maxLiters = numberOr(form.max_liters, 0);
+                    if (maxLiters <= 0) {
+                      setErrorMessage('Maximum liters must be > 0.');
+                      return;
+                    }
+                    if (minLiters > 0 && maxLiters < minLiters) {
+                      setErrorMessage('Maximum liters must be >= minimum liters.');
+                      return;
+                    }
+
+                    void savePatch('max_liters', { max_liters: maxLiters }, 'Updated max liters.');
+                  }}
+                  disabled={savingKey !== null}
+                  style={{
+                    padding: '10px 14px',
+                    borderRadius: 12,
+                    border: '1px solid #111827',
+                    background: '#111827',
+                    color: '#fff',
+                    cursor: 'pointer',
+                    fontWeight: 800,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {savingKey === 'max_liters' ? 'Saving...' : 'Update'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -199,15 +295,81 @@ export default function SettingsPage() {
             </div>
           </div>
 
+          <div style={{ marginTop: 12, display: 'flex', justifyContent: 'flex-end' }}>
+            <button
+              type="button"
+              onClick={() => {
+                const discountValue = numberOr(form.discount_value, 0);
+                if (discountValue < 0) {
+                  setErrorMessage('Discount value must be >= 0.');
+                  return;
+                }
+                if (form.discount_type === 'percentage' && discountValue > 100) {
+                  setErrorMessage('Percentage discount cannot exceed 100.');
+                  return;
+                }
+
+                void savePatch(
+                  'discounts',
+                  {
+                    discount_enabled: Boolean(form.discount_enabled),
+                    discount_type: form.discount_type,
+                    discount_value: discountValue,
+                  },
+                  'Updated discounts.'
+                );
+              }}
+              disabled={savingKey !== null}
+              style={{
+                padding: '10px 14px',
+                borderRadius: 12,
+                border: '1px solid #111827',
+                background: '#111827',
+                color: '#fff',
+                cursor: 'pointer',
+                fontWeight: 800,
+              }}
+            >
+              {savingKey === 'discounts' ? 'Saving...' : 'Update Discounts'}
+            </button>
+          </div>
+
           <div style={{ marginTop: 12 }}>
             <label style={{ display: 'block', fontWeight: 800, fontSize: 12, color: '#6B7280' }}>
               Credit reward per liter (₹)
             </label>
-            <input
-              value={form.credit_per_liter}
-              onChange={(e) => setForm((p) => ({ ...p, credit_per_liter: e.target.value }))}
-              style={{ width: '100%', padding: 10, borderRadius: 10, border: '1px solid #d1d5db', marginTop: 6 }}
-            />
+            <div style={{ display: 'flex', gap: 10, marginTop: 6 }}>
+              <input
+                value={form.credit_per_liter}
+                onChange={(e) => setForm((p) => ({ ...p, credit_per_liter: e.target.value }))}
+                style={{ flex: 1, padding: 10, borderRadius: 10, border: '1px solid #d1d5db' }}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  const creditPerLiter = numberOr(form.credit_per_liter, 0);
+                  if (creditPerLiter < 0) {
+                    setErrorMessage('Credit per liter must be >= 0.');
+                    return;
+                  }
+
+                  void savePatch('credit_per_liter', { credit_per_liter: creditPerLiter }, 'Updated credit reward.');
+                }}
+                disabled={savingKey !== null}
+                style={{
+                  padding: '10px 14px',
+                  borderRadius: 12,
+                  border: '1px solid #111827',
+                  background: '#111827',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  fontWeight: 800,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {savingKey === 'credit_per_liter' ? 'Saving...' : 'Update'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -218,8 +380,8 @@ export default function SettingsPage() {
         </div>
         <button
           type="button"
-          onClick={onSave}
-          disabled={Boolean(validation) || isSaving}
+          onClick={onSaveAll}
+          disabled={Boolean(validation) || savingKey !== null}
           style={{
             padding: '10px 14px',
             borderRadius: 12,
@@ -230,7 +392,7 @@ export default function SettingsPage() {
             fontWeight: 800,
           }}
         >
-          {isSaving ? 'Saving…' : 'Save Settings'}
+          {savingKey === 'all' ? 'Saving...' : 'Save Settings'}
         </button>
       </div>
     </div>

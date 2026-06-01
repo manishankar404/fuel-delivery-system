@@ -1,4 +1,4 @@
-import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Image, RefreshControl, StyleSheet, Text, View } from 'react-native';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -112,6 +112,16 @@ export default function ProductsScreen() {
             return (
               <View style={styles.card}>
                 <View style={styles.cardTop}>
+                  {p.image_url ? (
+                    <Image
+                      source={{ uri: p.image_url }}
+                      style={styles.productImage}
+                      resizeMode="cover"
+                      accessibilityLabel={`${p.name} image`}
+                    />
+                  ) : (
+                    <View style={styles.productImagePlaceholder} />
+                  )}
                   <Text style={styles.cardTitle} numberOfLines={1}>
                     {p.name}
                   </Text>
@@ -181,7 +191,6 @@ const styles = StyleSheet.create({
   },
   cardTop: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     gap: 10,
   },
@@ -195,6 +204,20 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '900',
     color: '#111827',
+  },
+  productImage: {
+    width: 52,
+    height: 52,
+    borderRadius: 14,
+    backgroundColor: '#F3F4F6',
+  },
+  productImagePlaceholder: {
+    width: 52,
+    height: 52,
+    borderRadius: 14,
+    backgroundColor: '#F3F4F6',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   desc: {
     marginTop: 8,
@@ -213,4 +236,3 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
-

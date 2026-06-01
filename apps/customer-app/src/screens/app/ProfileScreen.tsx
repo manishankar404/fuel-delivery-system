@@ -4,9 +4,13 @@ import AppButton from '../../components/AppButton';
 import { useAuth } from '../../context/AuthContext';
 import { signOut } from '../../services/authService';
 import BottomTabBar from '../../navigation/BottomTabBar';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { AppStackParamList } from '../../navigation/types';
 
 export default function ProfileScreen() {
   const { profile } = useAuth();
+  const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
 
   return (
     <View style={styles.root}>
@@ -14,6 +18,9 @@ export default function ProfileScreen() {
         <Text style={styles.title}>Profile</Text>
         <Text style={styles.row}>Email: {profile?.email}</Text>
         <Text style={styles.row}>Role: {profile?.role}</Text>
+
+        <View style={{ height: 12 }} />
+        <AppButton title="Wallet" onPress={() => navigation.navigate('Wallet')} />
 
         <View style={{ height: 12 }} />
         <AppButton title="Logout" onPress={signOut} />
@@ -46,4 +53,3 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
 });
-

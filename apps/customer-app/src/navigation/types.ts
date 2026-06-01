@@ -15,4 +15,5 @@ export type AppStackParamList = {
   Tracking: undefined;
   Products: undefined;
   Profile: undefined;
+  Wallet: undefined;
 };

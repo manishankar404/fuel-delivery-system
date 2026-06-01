@@ -9,6 +9,7 @@ const LINKS = [
   { to: '/orders', label: 'Orders' },
   { to: '/products', label: 'Products' },
   { to: '/delivery-agents', label: 'Delivery Agents' },
+  { to: '/wallets', label: 'Wallets' },
   { to: '/settings', label: 'Platform Settings' },
 ];
 
@@ -43,4 +44,3 @@ export default function AdminLayout() {
     </div>
   );
 }
-

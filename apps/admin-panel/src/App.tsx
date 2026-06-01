@@ -17,6 +17,7 @@ import AdminLayout from './layout/AdminLayout';
 import PlaceholderPage from './pages/PlaceholderPage';
 import SettingsPage from './pages/SettingsPage';
 import ProductsPage from './pages/ProductsPage';
+import WalletsPage from './pages/WalletsPage';
 
 export default function App() {
   const [session, setSession] =
@@ -66,6 +67,7 @@ export default function App() {
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/orders" element={<DashboardPage />} />
+          <Route path="/wallets" element={<WalletsPage />} />
           <Route
             path="/products"
             element={<ProductsPage />}

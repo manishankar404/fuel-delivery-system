@@ -11,6 +11,7 @@ import LiveTrackingScreen from '../screens/app/LiveTrackingScreen';
 import TrackingHubScreen from '../screens/app/TrackingHubScreen';
 import ProductsScreen from '../screens/app/ProductsScreen';
 import ProfileScreen from '../screens/app/ProfileScreen';
+import WalletScreen from '../screens/app/WalletScreen';
 
 import type { AppStackParamList } from './types';
 
@@ -47,6 +48,12 @@ export default function AppStack() {
         name="Profile"
         component={ProfileScreen}
         options={{ title: 'Profile' }}
+      />
+
+      <Stack.Screen
+        name="Wallet"
+        component={WalletScreen}
+        options={{ title: 'Wallet' }}
       />
 
       <Stack.Screen
