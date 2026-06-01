@@ -21,6 +21,8 @@ import type { AppStackParamList } from '../../navigation/types';
 import { useAuth } from '../../context/AuthContext';
 import { createOrder, getFuelTypes } from '../../services/orderService';
 import type { FuelType } from '../../types/order';
+import { getPlatformSettings } from '../../services/platformSettingsService';
+import { calculatePricingBreakdown } from '../../services/pricingService';
 
 const DEFAULT_LOCATION = {
   latitude: 11.6643,
@@ -38,18 +40,16 @@ export default function CreateOrderScreen() {
   const [loading, setLoading] = useState<boolean>(false);
   const [showMap, setShowMap] = useState<boolean>(false);
   const [location, setLocation] = useState(DEFAULT_LOCATION);
+  const [settings, setSettings] = useState<Awaited<ReturnType<typeof getPlatformSettings>> | null>(
+    null
+  );
 
   const quantityValue = useMemo(() => Number(quantity), [quantity]);
-  const totalPrice = useMemo(() => {
-    if (!selectedFuel || !Number.isFinite(quantityValue) || quantityValue <= 0) {
-      return null;
-    }
-    return quantityValue * selectedFuel.price_per_liter;
-  }, [quantityValue, selectedFuel]);
 
   useEffect(() => {
     void loadFuelTypes();
     void getCurrentLocation();
+    void loadSettings();
   }, []);
 
   const loadFuelTypes = async () => {
@@ -61,6 +61,16 @@ export default function CreateOrderScreen() {
       }
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  const loadSettings = async () => {
+    try {
+      const data = await getPlatformSettings();
+      setSettings(data);
+    } catch (error) {
+      console.log(error);
+      setSettings(null);
     }
   };
 
@@ -100,11 +110,33 @@ export default function CreateOrderScreen() {
     }
   };
 
+  const pricing = useMemo(() => {
+    if (!settings || !selectedFuel) return null;
+    if (!Number.isFinite(quantityValue) || quantityValue <= 0) return null;
+
+    return calculatePricingBreakdown({
+      liters: quantityValue,
+      unitPrice: selectedFuel.price_per_liter,
+      settings,
+    });
+  }, [quantityValue, selectedFuel, settings]);
+
   const handleCreateOrder = async () => {
     if (!selectedFuel || !profile) return;
     if (!Number.isFinite(quantityValue) || quantityValue <= 0) {
       Alert.alert('Invalid quantity', 'Please enter a valid quantity in liters.');
       return;
+    }
+
+    if (settings) {
+      if (quantityValue < settings.min_liters) {
+        Alert.alert('Quantity too low', `Minimum order is ${settings.min_liters} liters.`);
+        return;
+      }
+      if (quantityValue > settings.max_liters) {
+        Alert.alert('Quantity too high', `Maximum order is ${settings.max_liters} liters.`);
+        return;
+      }
     }
 
     try {
@@ -114,7 +146,7 @@ export default function CreateOrderScreen() {
         customer_id: profile.id,
         fuel_type_id: selectedFuel.id,
         quantity_liters: quantityValue,
-        total_price: quantityValue * selectedFuel.price_per_liter,
+        total_price: pricing ? pricing.total : quantityValue * selectedFuel.price_per_liter,
         delivery_address: address,
         payment_method: 'cash',
         latitude: location.latitude,
@@ -124,10 +156,7 @@ export default function CreateOrderScreen() {
       setQuantity('');
       setShowMap(false);
 
-      navigation.navigate('OrderHistory', {
-        initialTab: 'active',
-        highlightOrderId: createdOrder.id,
-      });
+      navigation.navigate('Orders', { initialTab: 'active', highlightOrderId: createdOrder.id });
     } catch (error: unknown) {
       Alert.alert('Order Failed', error instanceof Error ? error.message : 'Failed to create order');
     } finally {
@@ -158,15 +187,47 @@ export default function CreateOrderScreen() {
 
       <Text style={styles.label}>Quantity</Text>
       <TextInput
-        placeholder="Liters"
+        placeholder={
+          settings ? `Liters (${settings.min_liters}–${settings.max_liters})` : 'Liters'
+        }
         keyboardType="numeric"
         value={quantity}
         onChangeText={setQuantity}
         style={styles.input}
       />
 
-      {totalPrice !== null ? (
-        <Text style={styles.priceHint}>Estimated total: ₹{totalPrice}</Text>
+      {pricing ? (
+        <View style={styles.breakdown}>
+          <Text style={styles.breakTitle}>Pricing</Text>
+
+          <View style={styles.breakRow}>
+            <Text style={styles.breakLabel}>Subtotal</Text>
+            <Text style={styles.breakValue}>₹{pricing.subtotal}</Text>
+          </View>
+
+          <View style={styles.breakRow}>
+            <Text style={styles.breakLabel}>Delivery charge</Text>
+            <Text style={styles.breakValue}>₹{pricing.deliveryCharge}</Text>
+          </View>
+
+          {pricing.discountAmount > 0 ? (
+            <View style={styles.breakRow}>
+              <Text style={styles.breakLabel}>Discount</Text>
+              <Text style={styles.breakValue}>-₹{pricing.discountAmount}</Text>
+            </View>
+          ) : null}
+
+          <View style={styles.breakRow}>
+            <Text style={styles.breakLabelStrong}>Total</Text>
+            <Text style={styles.breakValueStrong}>₹{pricing.total}</Text>
+          </View>
+
+          {pricing.creditsEarned > 0 ? (
+            <Text style={styles.creditHint}>
+              Earn credits: ₹{pricing.creditsEarned} (based on {pricing.liters} L)
+            </Text>
+          ) : null}
+        </View>
       ) : null}
 
       <TouchableOpacity style={styles.locationButton} onPress={() => setShowMap(!showMap)}>
@@ -261,11 +322,50 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
 
-  priceHint: {
-    fontSize: 13,
-    color: '#6B7280',
+  breakdown: {
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    padding: 12,
     marginBottom: 12,
+  },
+  breakTitle: {
+    fontSize: 12,
+    color: '#6B7280',
+    fontWeight: '900',
+    marginBottom: 10,
+  },
+  breakRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  breakLabel: {
+    fontSize: 13,
+    color: '#111827',
     fontWeight: '600',
+  },
+  breakValue: {
+    fontSize: 13,
+    color: '#111827',
+    fontWeight: '800',
+  },
+  breakLabelStrong: {
+    fontSize: 13,
+    color: '#111827',
+    fontWeight: '900',
+  },
+  breakValueStrong: {
+    fontSize: 13,
+    color: '#111827',
+    fontWeight: '900',
+  },
+  creditHint: {
+    marginTop: 8,
+    fontSize: 12,
+    color: '#16A34A',
+    fontWeight: '800',
   },
 
   locationButton: {

@@ -8,6 +8,7 @@ import { useDeliveryAgentId } from '../context/DeliveryAgentContext';
 import { useRealtimeAssignedOrders } from '../hooks/useRealtimeAssignedOrders';
 import { updateOrderStatus } from '../services/orderService';
 import type { DeliveryOrder } from '../types/order';
+import BottomTabBar from '../navigation/BottomTabBar';
 
 export default function OrdersScreen() {
   const deliveryAgentId = useDeliveryAgentId();
@@ -46,36 +47,43 @@ export default function OrdersScreen() {
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Orders</Text>
-      <Text style={styles.subHeader}>Assigned queue • Realtime updates enabled</Text>
+    <View style={styles.root}>
+      <View style={styles.container}>
+        <Text style={styles.header}>Active Deliveries</Text>
+        <Text style={styles.subHeader}>Assigned queue • Realtime updates enabled</Text>
 
-      <FlatList
-        data={activeOrders}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={refresh} />}
-        contentContainerStyle={activeOrders.length === 0 ? styles.emptyContainer : undefined}
-        ListEmptyComponent={
-          isLoading ? (
-            <EmptyState title="Loading assigned orders…" description="Syncing your queue." />
-          ) : (
-            <EmptyState
-              title="No active orders"
-              description="New deliveries will appear here automatically."
-            />
-          )
-        }
-      />
+        <FlatList
+          data={activeOrders}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={refresh} />}
+          contentContainerStyle={activeOrders.length === 0 ? styles.emptyContainer : undefined}
+          ListEmptyComponent={
+            isLoading ? (
+              <EmptyState title="Loading assigned orders…" description="Syncing your queue." />
+            ) : (
+              <EmptyState
+                title="No active orders"
+                description="New deliveries will appear here automatically."
+              />
+            )
+          }
+        />
+      </View>
+
+      <BottomTabBar active="ActiveDeliveries" />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: '#F9FAFB',
+  },
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#F9FAFB',
   },
   header: {
     fontSize: 22,
@@ -94,4 +102,3 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
-

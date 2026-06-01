@@ -9,6 +9,7 @@ import { useRealtimeAssignedOrders } from '../hooks/useRealtimeAssignedOrders';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { AgentAppStackParamList } from '../navigation/types';
+import BottomTabBar from '../navigation/BottomTabBar';
 
 export default function DashboardHomeScreen() {
   const navigation =
@@ -22,42 +23,49 @@ export default function DashboardHomeScreen() {
   const deliveredCount = orders.filter((o) => o.status === 'delivered').length;
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Field Dashboard</Text>
-      <Text style={styles.subtitle}>
-        Location updates: {locationState.isEnabled ? 'On' : 'Off'}
-      </Text>
+    <View style={styles.root}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Field Dashboard</Text>
+        <Text style={styles.subtitle}>
+          Location updates: {locationState.isEnabled ? 'On' : 'Off'}
+        </Text>
 
-      <View style={styles.metricsRow}>
-        <View style={styles.metricCard}>
-          <Text style={styles.metricLabel}>Active</Text>
-          <Text style={styles.metricValue}>{activeCount}</Text>
+        <View style={styles.metricsRow}>
+          <View style={styles.metricCard}>
+            <Text style={styles.metricLabel}>Active</Text>
+            <Text style={styles.metricValue}>{activeCount}</Text>
+          </View>
+          <View style={styles.metricCard}>
+            <Text style={styles.metricLabel}>Delivered</Text>
+            <Text style={styles.metricValue}>{deliveredCount}</Text>
+          </View>
         </View>
-        <View style={styles.metricCard}>
-          <Text style={styles.metricLabel}>Delivered</Text>
-          <Text style={styles.metricValue}>{deliveredCount}</Text>
-        </View>
+
+        <AppButton
+          title="Go to Active Deliveries"
+          onPress={() => navigation.navigate('ActiveDeliveries')}
+        />
+        <View style={{ height: 10 }} />
+        <AppButton title="View History" onPress={() => navigation.navigate('History')} />
+
+        {isLoading && orders.length === 0 ? (
+          <EmptyState title="Syncing…" description="Pulling your latest assigned jobs." />
+        ) : null}
       </View>
 
-      <AppButton title="Go to Orders" onPress={() => navigation.navigate('Orders')} />
-      <View style={{ height: 10 }} />
-      <AppButton
-        title="View Delivered Orders"
-        onPress={() => navigation.navigate('Delivered')}
-      />
-
-      {isLoading && orders.length === 0 ? (
-        <EmptyState title="Syncing…" description="Pulling your latest assigned jobs." />
-      ) : null}
+      <BottomTabBar active="Dashboard" />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: '#F9FAFB',
+  },
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#F9FAFB',
   },
   title: {
     fontSize: 24,
@@ -96,4 +104,3 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
 });
-

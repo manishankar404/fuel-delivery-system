@@ -7,6 +7,7 @@ import EmptyState from '../components/EmptyState';
 import { useDeliveryAgentId } from '../context/DeliveryAgentContext';
 import { useRealtimeAssignedOrders } from '../hooks/useRealtimeAssignedOrders';
 import type { DeliveryOrder } from '../types/order';
+import BottomTabBar from '../navigation/BottomTabBar';
 
 export default function DeliveredOrdersScreen() {
   const deliveryAgentId = useDeliveryAgentId();
@@ -25,33 +26,40 @@ export default function DeliveredOrdersScreen() {
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Delivered</Text>
-      <Text style={styles.subHeader}>Completed deliveries</Text>
+    <View style={styles.root}>
+      <View style={styles.container}>
+        <Text style={styles.header}>History</Text>
+        <Text style={styles.subHeader}>Completed deliveries</Text>
 
-      <FlatList
-        data={deliveredOrders}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={refresh} />}
-        contentContainerStyle={deliveredOrders.length === 0 ? styles.emptyContainer : undefined}
-        ListEmptyComponent={
-          isLoading ? (
-            <EmptyState title="Loading delivered orders…" description="Syncing history." />
-          ) : (
-            <EmptyState title="No delivered orders" description="Completed jobs will show up here." />
-          )
-        }
-      />
+        <FlatList
+          data={deliveredOrders}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={refresh} />}
+          contentContainerStyle={deliveredOrders.length === 0 ? styles.emptyContainer : undefined}
+          ListEmptyComponent={
+            isLoading ? (
+              <EmptyState title="Loading delivered orders…" description="Syncing history." />
+            ) : (
+              <EmptyState title="No delivered orders" description="Completed jobs will show up here." />
+            )
+          }
+        />
+      </View>
+
+      <BottomTabBar active="History" />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: '#F9FAFB',
+  },
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#F9FAFB',
   },
   header: {
     fontSize: 22,
@@ -70,4 +78,3 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
-

@@ -23,6 +23,7 @@ import { supabase } from '../../lib/supabase';
 import { getOrderHistory } from '../../services/historyService';
 import { getCustomerOrders } from '../../services/orderService';
 import type { Order } from '../../types/order';
+import BottomTabBar from '../../navigation/BottomTabBar';
 
 type HistoryItem = {
   id: string;
@@ -232,50 +233,57 @@ export default function OrderHistoryScreen() {
   }, [filteredOrders, highlightOrderId, isLoading]);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.headerRow}>
-        <Text style={styles.header}>My Orders</Text>
-        <Text style={styles.headerSub}>Realtime updates enabled</Text>
+    <View style={styles.root}>
+      <View style={styles.container}>
+        <View style={styles.headerRow}>
+          <Text style={styles.header}>Orders</Text>
+          <Text style={styles.headerSub}>Realtime updates enabled</Text>
+        </View>
+
+        <View style={styles.tabs}>
+          <TouchableOpacity
+            style={[styles.tab, tab === 'active' && styles.tabActive]}
+            onPress={() => setTab('active')}
+          >
+            <Text style={[styles.tabText, tab === 'active' && styles.tabTextActive]}>Active</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, tab === 'delivered' && styles.tabActive]}
+            onPress={() => setTab('delivered')}
+          >
+            <Text style={[styles.tabText, tab === 'delivered' && styles.tabTextActive]}>
+              Delivered
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <FlatList
+          ref={listRef}
+          data={filteredOrders}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
+          contentContainerStyle={filteredOrders.length === 0 ? styles.emptyContainer : undefined}
+          ListEmptyComponent={listEmpty}
+          onScrollToIndexFailed={() => {
+            // fallback: do nothing
+          }}
+        />
       </View>
 
-      <View style={styles.tabs}>
-        <TouchableOpacity
-          style={[styles.tab, tab === 'active' && styles.tabActive]}
-          onPress={() => setTab('active')}
-        >
-          <Text style={[styles.tabText, tab === 'active' && styles.tabTextActive]}>Active</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, tab === 'delivered' && styles.tabActive]}
-          onPress={() => setTab('delivered')}
-        >
-          <Text style={[styles.tabText, tab === 'delivered' && styles.tabTextActive]}>
-            Delivered
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      <FlatList
-        ref={listRef}
-        data={filteredOrders}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
-        contentContainerStyle={filteredOrders.length === 0 ? styles.emptyContainer : undefined}
-        ListEmptyComponent={listEmpty}
-        onScrollToIndexFailed={() => {
-          // fallback: do nothing
-        }}
-      />
+      <BottomTabBar active="Orders" />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: '#F9FAFB',
+  },
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#F9FAFB',
   },
   headerRow: {
     marginBottom: 12,
@@ -336,4 +344,3 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
-

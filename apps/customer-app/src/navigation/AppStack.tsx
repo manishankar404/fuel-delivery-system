@@ -8,6 +8,10 @@ import OrderHistoryScreen from '../screens/app/OrderHistoryScreen';
 
 import LiveTrackingScreen from '../screens/app/LiveTrackingScreen';
 
+import TrackingHubScreen from '../screens/app/TrackingHubScreen';
+import ProductsScreen from '../screens/app/ProductsScreen';
+import ProfileScreen from '../screens/app/ProfileScreen';
+
 import type { AppStackParamList } from './types';
 
 const Stack =
@@ -15,10 +19,34 @@ const Stack =
 
 export default function AppStack() {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator initialRouteName="Home">
       <Stack.Screen
         name="Home"
         component={HomeScreen}
+      />
+
+      <Stack.Screen
+        name="Orders"
+        component={OrderHistoryScreen}
+        options={{ title: 'Orders' }}
+      />
+
+      <Stack.Screen
+        name="Tracking"
+        component={TrackingHubScreen}
+        options={{ title: 'Tracking' }}
+      />
+
+      <Stack.Screen
+        name="Products"
+        component={ProductsScreen}
+        options={{ title: 'Products' }}
+      />
+
+      <Stack.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{ title: 'Profile' }}
       />
 
       <Stack.Screen

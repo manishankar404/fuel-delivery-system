@@ -8,4 +8,11 @@ export type AppStackParamList = {
       }
     | undefined;
   LiveTracking: { orderId: string };
+  Orders: {
+    initialTab?: 'active' | 'delivered';
+    highlightOrderId?: string;
+  } | undefined;
+  Tracking: undefined;
+  Products: undefined;
+  Profile: undefined;
 };

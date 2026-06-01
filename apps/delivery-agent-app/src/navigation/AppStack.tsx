@@ -8,6 +8,8 @@ import type { AgentAppStackParamList } from './types';
 import DashboardHomeScreen from '../screens/DashboardHomeScreen';
 import OrdersScreen from '../screens/OrdersScreen';
 import DeliveredOrdersScreen from '../screens/DeliveredOrdersScreen';
+import MapScreen from '../screens/MapScreen';
+import ProfileScreen from '../screens/ProfileScreen';
 
 const Stack = createNativeStackNavigator<AgentAppStackParamList>();
 
@@ -28,10 +30,43 @@ export default function AppStack() {
       />
 
       <Stack.Screen
+        name="ActiveDeliveries"
+        component={OrdersScreen}
+        options={{
+          title: 'Active Deliveries',
+        }}
+      />
+
+      <Stack.Screen
+        name="History"
+        component={DeliveredOrdersScreen}
+        options={{
+          title: 'History',
+        }}
+      />
+
+      <Stack.Screen
+        name="Map"
+        component={MapScreen}
+        options={{
+          title: 'Map',
+        }}
+      />
+
+      <Stack.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          title: 'Profile',
+        }}
+      />
+
+      {/* Legacy route names */}
+      <Stack.Screen
         name="Orders"
         component={OrdersScreen}
         options={{
-          title: 'Orders',
+          title: 'Active Deliveries',
         }}
       />
 
@@ -39,7 +74,7 @@ export default function AppStack() {
         name="Delivered"
         component={DeliveredOrdersScreen}
         options={{
-          title: 'Delivered',
+          title: 'History',
         }}
       />
     </Stack.Navigator>

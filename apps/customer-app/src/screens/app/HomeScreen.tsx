@@ -1,106 +1,65 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-} from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-
-import type { AppStackParamList } from '../../navigation/types';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import AppButton from '../../components/AppButton';
-
-import { signOut } from '../../services/authService';
-
 import { useAuth } from '../../context/AuthContext';
+import type { AppStackParamList } from '../../navigation/types';
+import BottomTabBar from '../../navigation/BottomTabBar';
 
-type Props =
-  NativeStackScreenProps<AppStackParamList, 'Home'>;
+export default function HomeScreen() {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<AppStackParamList>>();
 
-export default function HomeScreen({
-  navigation,
-}: Props) {
   const { profile } = useAuth();
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>
-        Fuel Delivery App
-      </Text>
+    <View style={styles.root}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Fuel Delivery</Text>
+        <Text style={styles.subtitle}>
+          Welcome{profile?.email ? `, ${profile.email}` : ''}.
+        </Text>
 
-      <Text style={styles.text}>
-        Email: {profile?.email}
-      </Text>
+        <View style={{ height: 14 }} />
 
-      <Text style={styles.text}>
-        Role: {profile?.role}
-      </Text>
+        <AppButton title="Create Order" onPress={() => navigation.navigate('CreateOrder')} />
+        <View style={{ height: 12 }} />
 
-      <AppButton
-        title="Create Order"
-        onPress={() =>
-          navigation.navigate(
-            'CreateOrder'
-          )
-        }
-      />
-      <View
-        style={{
-          height: 12,
-        }}
-      />
+        <AppButton
+          title="Orders"
+          onPress={() => navigation.navigate('Orders', { initialTab: 'active' })}
+        />
+        <View style={{ height: 12 }} />
 
-      <AppButton
-        title="My Orders"
-        onPress={() =>
-          navigation.navigate(
-            'OrderHistory',
-            { initialTab: 'active' }
-          )
-        }
-      />
+        <AppButton title="Tracking" onPress={() => navigation.navigate('Tracking')} />
+      </View>
 
-      <View
-        style={{
-          height: 12,
-        }}
-      />
-
-      <AppButton
-        title="Delivered Orders"
-        onPress={() =>
-          navigation.navigate(
-            'OrderHistory',
-            { initialTab: 'delivered' }
-          )
-        }
-      />
-
-      <View style={{ height: 12 }} />
-
-      <AppButton
-        title="Logout"
-        onPress={signOut}
-      />
+      <BottomTabBar active="Home" />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: '#F9FAFB',
+  },
   container: {
     flex: 1,
-    justifyContent: 'center',
-    padding: 24,
+    padding: 16,
   },
-
   title: {
     fontSize: 24,
-    marginBottom: 20,
-    fontWeight: 'bold',
+    fontWeight: '900',
+    color: '#111827',
+    marginBottom: 6,
   },
-
-  text: {
-    marginBottom: 12,
-    fontSize: 16,
+  subtitle: {
+    fontSize: 13,
+    color: '#6B7280',
+    fontWeight: '600',
   },
 });
+
