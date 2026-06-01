@@ -16,6 +16,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import AdminLayout from './layout/AdminLayout';
 import PlaceholderPage from './pages/PlaceholderPage';
 import SettingsPage from './pages/SettingsPage';
+import ProductsPage from './pages/ProductsPage';
 
 export default function App() {
   const [session, setSession] =
@@ -67,12 +68,7 @@ export default function App() {
           <Route path="/orders" element={<DashboardPage />} />
           <Route
             path="/products"
-            element={
-              <PlaceholderPage
-                title="Products"
-                description="Product catalog and pricing will live here."
-              />
-            }
+            element={<ProductsPage />}
           />
           <Route
             path="/delivery-agents"
