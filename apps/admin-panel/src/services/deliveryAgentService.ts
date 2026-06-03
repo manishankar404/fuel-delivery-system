@@ -13,10 +13,14 @@ export const getDeliveryAgents =
         )
         .select(`
           id,
+          profile_id,
           vehicle_number,
+          is_available,
           profiles (
+            id,
             full_name,
-            email
+            email,
+            phone_number
           )
         `);
 
