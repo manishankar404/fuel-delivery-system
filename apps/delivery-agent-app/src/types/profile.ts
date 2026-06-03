@@ -14,6 +14,10 @@ export interface Profile {
   created_at?: string;
 }
 
-export interface CustomerProfile extends Profile {
-  wallet_balance?: number;
+export interface DeliveryAgentProfile extends Profile {
+  vehicle_number?: string;
+
+  is_available?: boolean;
+
+  total_deliveries?: number;
 }

@@ -10,6 +10,9 @@ const LINKS = [
   { to: '/products', label: 'Products' },
   { to: '/delivery-agents', label: 'Delivery Agents' },
   { to: '/wallets', label: 'Wallets' },
+  { to: '/customers', label: 'Customers' },
+  { to: '/admin-users', label: 'Admin Users' },
+  { to: '/my-profile', label: 'My Profile' },
   { to: '/settings', label: 'Platform Settings' },
 ];
 
