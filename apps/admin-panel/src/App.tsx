@@ -14,10 +14,10 @@ import DashboardPage from './pages/DashboardPage';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import AdminLayout from './layout/AdminLayout';
-import PlaceholderPage from './pages/PlaceholderPage';
 import SettingsPage from './pages/SettingsPage';
 import ProductsPage from './pages/ProductsPage';
 import WalletsPage from './pages/WalletsPage';
+import DeliveryAgentsPage from './pages/DeliveryAgentsPage';
 
 export default function App() {
   const [session, setSession] =
@@ -74,12 +74,7 @@ export default function App() {
           />
           <Route
             path="/delivery-agents"
-            element={
-              <PlaceholderPage
-                title="Delivery Agents"
-                description="Agent management and performance will live here."
-              />
-            }
+            element={<DeliveryAgentsPage />}
           />
           <Route
             path="/settings"
