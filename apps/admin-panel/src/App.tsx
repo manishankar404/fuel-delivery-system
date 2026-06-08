@@ -17,10 +17,14 @@ import AdminLayout from './layout/AdminLayout';
 import SettingsPage from './pages/SettingsPage';
 import ProductsPage from './pages/ProductsPage';
 import WalletsPage from './pages/WalletsPage';
+<<<<<<< HEAD
 import MyProfilePage from './pages/MyProfilePage';
 import CustomersPage from './pages/CustomersPage';
 import DeliveryAgentsPage from './pages/DeliveryAgentsPage';
 import AdminUsersPage from './pages/AdminUsersPage';
+=======
+import DeliveryAgentsPage from './pages/DeliveryAgentsPage';
+>>>>>>> d641c1ea25d72072f838a28e01cb154f371b0e0c
 
 export default function App() {
   const [session, setSession] =
@@ -77,6 +81,7 @@ export default function App() {
           />
           <Route
             path="/delivery-agents"
+<<<<<<< HEAD
             element={
               <DeliveryAgentsPage />
             }
@@ -98,6 +103,9 @@ export default function App() {
             element={
               <MyProfilePage />
             }
+=======
+            element={<DeliveryAgentsPage />}
+>>>>>>> d641c1ea25d72072f838a28e01cb154f371b0e0c
           />
           <Route
             path="/settings"
