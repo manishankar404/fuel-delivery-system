@@ -11,7 +11,6 @@ export const getProfilePushToken = async (profileId: string) => {
     throw error;
   }
 
-<<<<<<< HEAD
   return data?.expo_push_token;
 };
 
@@ -133,33 +132,3 @@ export const getAgentStats = async (agentId: string) => {
     completed_deliveries: orders.filter((o) => o.status === 'delivered').length,
   };
 };
-=======
-    return data
-      ?.expo_push_token;
-  };
-
-export const getCustomers =
-  async () => {
-    const {
-      data,
-      error,
-    } =
-      await supabase
-        .from('profiles')
-        .select(`
-          id,
-          full_name,
-          email,
-          phone_number,
-          role
-        `)
-        .eq('role', 'customer')
-        .order('full_name', { ascending: true });
-
-    if (error) {
-      throw error;
-    }
-
-    return data;
-  };
->>>>>>> d641c1ea25d72072f838a28e01cb154f371b0e0c
